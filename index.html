@@ -438,7 +438,7 @@
         // Initialize on page load
         window.onload = function() {
             // Check if Web App URL is configured
-            if (WEB_APP_URL === 'https://script.google.com/macros/s/AKfycbxTtWwPys1wjOXzuqp9nHhm0up7SBkSRXQTdL42Qt4K0utrgado1pjDeN6GwvPopNC9GQ/exec' || !WEB_APP_URL) {
+            if (WEB_APP_URL === 'PASTE_YOUR_WEB_APP_URL_HERE' || !WEB_APP_URL) {
                 document.getElementById('connectionStatus').className = 'connection-status disconnected';
                 document.getElementById('connectionStatus').innerHTML = '⚠️ NOT CONFIGURED: Please edit the HTML file and paste your Web App URL at the top of the script section';
                 document.getElementById('mainContent').classList.add('hidden');
