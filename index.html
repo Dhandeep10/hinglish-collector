@@ -1,599 +1,470 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hinglish Gold Collector - Cloud Edition</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-        
-        .header h1 { font-size: 32px; margin-bottom: 10px; }
-        .header .subtitle { font-size: 16px; opacity: 0.95; margin-bottom: 20px; }
-        .header .cloud-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .connection-status {
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .connection-status.connected {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        
-        .connection-status.disconnected {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-        
-        .connection-status.loading {
-            background: #bee3f8;
-            color: #2c5282;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .stat-card .number {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .label {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .form-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        
-        .form-group textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            width: 100%;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .recent-entries {
-            margin-top: 30px;
-        }
-        
-        .recent-entries h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .entry-card {
-            background: white;
-            border: 2px solid #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .entry-card .entry-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        
-        .entry-card .entry-id {
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .entry-card .entry-topic {
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-        
-        .entry-card .entry-content {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .topic-distribution {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-        
-        .topic-item {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 12px;
-        }
-        
-        .topic-item .topic-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .topic-item .topic-count {
-            color: #667eea;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .refresh-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        
-        .refresh-btn:hover {
-            background: #218838;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>Hinglish Gold Collector — Distribution Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --brand-1: #667eea;
+      --brand-2: #764ba2;
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --ok: #16a34a;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;}
+    body{margin:0;background:linear-gradient(135deg,var(--brand-1),var(--brand-2));padding:22px;color:#111;}
+    .wrap{max-width:1200px;margin:0 auto;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(2,6,23,0.2);}
+    header{padding:28px 32px;background:linear-gradient(135deg,var(--brand-1),var(--brand-2));color:white}
+    header h1{margin:0;font-size:20px}
+    header p{margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:13px}
+    .body{display:grid;grid-template-columns: 1fr 420px;gap:20px;padding:24px;background:var(--bg);}
+    /* left column */
+    .panel{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(15,23,42,0.06);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-group{margin-bottom:12px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px;background:white}
+    textarea{min-height:90px;resize:vertical}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--brand-1),var(--brand-2));color:white}
+    .btn-danger{background:var(--bad);color:white}
+    .stats-grid{display:flex;gap:12px;margin-bottom:12px}
+    .stat{flex:1;background:linear-gradient(90deg,#fff,#f7f9ff);padding:12px;border-radius:8px;text-align:center}
+    .stat .n{font-size:20px;font-weight:700}
+    .recent-list{max-height:220px;overflow:auto;margin-top:8px}
+    .entry{border:1px solid #eef2ff;padding:10px;border-radius:8px;margin-bottom:8px;background:linear-gradient(180deg,#fff,#fbfdff)}
+    .entry .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .entry .id{font-weight:700;color:var(--brand-1)}
+    .entry .topic{background:var(--brand-1);color:white;padding:4px 8px;border-radius:999px;font-size:12px}
+    /* right column */
+    .right{display:flex;flex-direction:column;gap:12px}
+    .chart-card{padding:12px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfdff);min-height:160px}
+    .chart-title{font-size:14px;margin-bottom:8px;color:#111;font-weight:700}
+    .progress-line{height:14px;background:#e6e9ef;border-radius:999px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--brand-1),var(--brand-2));text-align:right;padding-right:8px;color:white;font-weight:700;font-size:12px}
+    .footer-note{font-size:12px;color:var(--muted);margin-top:6px}
+    .flex{display:flex;gap:8px;align-items:center}
+    .small{font-size:12px;color:var(--muted)}
+    .center{display:flex;align-items:center;justify-content:center}
+    .danger{color:var(--bad)}
+    canvas{width:100% !important;height: auto !important}
+    @media (max-width:1000px){ .body{grid-template-columns:1fr; } }
+  </style>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🌐 Hinglish Gold Collector</h1>
-            <p class="subtitle">Cloud-Powered Multi-User Data Collection System</p>
-            <span class="cloud-badge">☁️ CLOUD EDITION - Real-Time Sync</span>
-        </div>
+  <div class="wrap">
+    <header>
+      <h1>Hinglish Gold Collector — Distribution Dashboard</h1>
+      <p>Formatted IDs (stored in ID column). Fill dataset type, topic, and add samples. Charts update live.</p>
+    </header>
 
-        <!-- Connection Status -->
-        <div id="connectionStatus" class="connection-status loading">
-            🔄 Connecting to Google Sheets...
-        </div>
+    <div class="body">
+      <!-- LEFT: form, stats, recent -->
+      <div>
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <strong>Add new sample</strong>
+              <div class="small">dataset_type + topic + running number → id (formatted)</div>
+            </div>
+            <div id="connectionStatus" class="small">Connecting...</div>
+          </div>
 
-        <!-- Main Content -->
-        <div id="mainContent" class="content hidden">
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="number" id="totalCount">0</div>
-                    <div class="label">Total Samples</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="nextId">1</div>
-                    <div class="label">Next ID</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="todayCount">0</div>
-                    <div class="label">Added Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">550</div>
-                    <div class="label">Target</div>
-                </div>
+          <div class="stats-grid" style="margin-bottom:14px">
+            <div class="stat">
+              <div class="small">Seed total</div>
+              <div class="n" id="seedTotal">0</div>
+            </div>
+            <div class="stat">
+              <div class="small">Test total</div>
+              <div class="n" id="testTotal">0</div>
+            </div>
+            <div class="stat">
+              <div class="small">Overall</div>
+              <div class="n" id="overallTotal">0</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Dataset Type *</label>
+                <select id="datasetType">
+                  <option value="">Select</option>
+                  <option value="seed">Seed</option>
+                  <option value="test">Test</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Topic *</label>
+                <select id="topic">
+                  <option value="">Select</option>
+                  <option value="casual">casual</option>
+                  <option value="food">food</option>
+                  <option value="tech">tech</option>
+                  <option value="travel">travel</option>
+                  <option value="shopping">shopping</option>
+                  <option value="work">work</option>
+                  <option value="health">health</option>
+                  <option value="entertainment">entertainment</option>
+                  <option value="family">family</option>
+                  <option value="edu">edu</option>
+                </select>
+              </div>
             </div>
 
-            <!-- Refresh Button -->
-            <button class="refresh-btn" onclick="loadStats()">🔄 Refresh Data</button>
-
-            <!-- Topic Distribution -->
-            <h3>📊 Topic Distribution</h3>
-            <div class="topic-distribution" id="topicDistribution"></div>
-
-            <!-- Alert Messages -->
-            <div id="alertContainer"></div>
-
-            <!-- Data Collection Form -->
-            <div class="form-section">
-                <h3>➕ Add New Sample</h3>
-                
-                <div class="form-group">
-                    <label>Sample ID</label>
-                    <input type="text" id="sampleId" readonly style="background: #e9ecef;">
-                </div>
-
-                <div class="form-group">
-                    <label>Topic Category *</label>
-                    <select id="topic" required>
-                        <option value="">Select topic...</option>
-                        <option value="Politics">Politics</option>
-                        <option value="Sports">Sports</option>
-                        <option value="Entertainment">Entertainment</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Education">Education</option>
-                        <option value="Health">Health</option>
-                        <option value="Business">Business</option>
-                        <option value="Social Issues">Social Issues</option>
-                        <option value="Daily Life">Daily Life</option>
-                        <option value="Travel">Travel</option>
-                        <option value="Food">Food</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Source Platform *</label>
-                    <select id="source" required>
-                        <option value="">Select platform...</option>
-                        <option value="Reddit">Reddit</option>
-                        <option value="Quora">Quora</option>
-                        <option value="Twitter">Twitter</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="YouTube">YouTube</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Raw Hinglish Conversations *</label>
-                    <textarea id="rawConversations" placeholder="Paste the original Hinglish conversation here..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Summary</label>
-                    <textarea id="summary" placeholder="Brief summary of the conversation..." style="min-height: 100px;"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Next Reply</label>
-                    <textarea id="nextReply" placeholder="What would be a natural next reply..." style="min-height: 100px;"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="notes" placeholder="Any additional notes or observations..." style="min-height: 80px;"></textarea>
-                </div>
-
-                <button class="btn-primary" onclick="submitSample()" id="submitBtn">
-                    💾 Save to Cloud
-                </button>
+            <div class="form-group">
+              <label>Source *</label>
+              <input type="text" id="source" placeholder="e.g., Reddit, WhatsApp, Twitter" />
             </div>
 
-            <!-- Recent Entries -->
-            <div class="recent-entries">
-                <h3>📝 Recent Entries (Last 10)</h3>
-                <div id="recentEntries"></div>
+            <div class="form-group">
+              <label>Source URL</label>
+              <input type="text" id="sourceUrl" placeholder="optional URL" />
             </div>
+
+            <div class="form-group">
+              <label>Raw Conversations *</label>
+              <textarea id="rawConversations" placeholder="Paste Hinglish conversation here..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Summary</label>
+                <textarea id="summary" placeholder="Short summary"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Next Reply</label>
+                <textarea id="nextReply" placeholder="Suggested next reply"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Notes</label>
+              <textarea id="notes" placeholder="Extra notes"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn-primary" id="saveBtn" onclick="submitSample()">Save to Cloud</button>
+              <button class="btn" onclick="loadStats()" style="background:#eef2ff;border-radius:8px">Refresh</button>
+              <div id="formMsg" class="small" style="margin-left:8px"></div>
+            </div>
+          </div>
         </div>
+
+        <div class="panel" style="margin-top:12px">
+          <strong>Recent entries (last 10)</strong>
+          <div class="recent-list" id="recentEntries"></div>
+          <div class="footer-note">IDs shown are formatted IDs (id column). Use Delete to remove and resequence.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: charts -->
+      <div class="right">
+        <div class="chart-card">
+          <div class="chart-title">Seed — per-topic progress (goal totals shown)</div>
+          <canvas id="seedChart" height="380"></canvas>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <div class="small">Goal: <strong id="seedGoal">220</strong></div>
+            <div class="small">Collected: <strong id="seedCollected">0</strong></div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Test — per-topic progress (goal totals shown)</div>
+          <canvas id="testChart" height="380"></canvas>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <div class="small">Goal: <strong id="testGoal">330</strong></div>
+            <div class="small">Collected: <strong id="testCollected">0</strong></div>
+          </div>
+        </div>
+
+        <div class="panel center" style="padding:12px;flex-direction:column;align-items:stretch">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Overall Progress</strong>
+            <div class="small" id="overallGoalText">0 / 550</div>
+          </div>
+          <div class="progress-line" style="margin-bottom:8px">
+            <div id="overallProgressFill" class="progress-fill" style="width:0%">0%</div>
+          </div>
+          <div class="small">This updates automatically after add/delete.</div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ============================================================================
-        // 🔧 CONFIGURATION - PASTE YOUR WEB APP URL HERE!
-        // ============================================================================
-        // After deploying Google Apps Script, paste your Web App URL below:
-        // Example: 'https://script.google.com/macros/s/AKfycbzXXXXXXXXXXXXX/exec'
-        
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxTtWwPys1wjOXzuqp9nHhm0up7SBkSRXQTdL42Qt4K0utrgado1pjDeN6GwvPopNC9GQ/exec';
-        
-        // ============================================================================
-        // Don't change anything below this line!
-        // ============================================================================
-        
-        // Topics for distribution tracking
-        const TOPICS = [
-            'Politics', 'Sports', 'Entertainment', 'Technology', 'Education',
-            'Health', 'Business', 'Social Issues', 'Daily Life', 'Travel', 'Food'
-        ];
+<script>
+/* ============================
+   CONFIG - Paste your web app URL here
+   ============================ */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyMUyk_dZZpq9nBoNiH9eM6i6M7x28AfnDPKm3HP_-7cUjAnKTyfQCuk1JRdwxPtVR-Tw/exec";
 
-        // Initialize on page load
-        window.onload = function() {
-            // Check if Web App URL is configured
-            if (WEB_APP_URL === 'PASTE_YOUR_WEB_APP_URL_HERE' || !WEB_APP_URL) {
-                document.getElementById('connectionStatus').className = 'connection-status disconnected';
-                document.getElementById('connectionStatus').innerHTML = '⚠️ NOT CONFIGURED: Please edit the HTML file and paste your Web App URL at the top of the script section';
-                document.getElementById('mainContent').classList.add('hidden');
-            } else {
-                document.getElementById('mainContent').classList.remove('hidden');
-                loadStats();
+/* Topics/order (must match backend) */
+const TOPICS = ['casual','food','tech','travel','shopping','work','health','entertainment','family','edu'];
+const SEED_GOALS = { casual:40, food:20, tech:20, travel:20, shopping:20, work:20, health:20, entertainment:20, family:20, edu:20 };
+const TEST_GOALS = { casual:60, food:30, tech:30, travel:30, shopping:30, work:30, health:30, entertainment:30, family:30, edu:30 };
+const TOTAL_GOAL_SEED = Object.values(SEED_GOALS).reduce((a,b)=>a+b,0);
+const TOTAL_GOAL_TEST = Object.values(TEST_GOALS).reduce((a,b)=>a+b,0);
+const TOTAL_GOAL = TOTAL_GOAL_SEED + TOTAL_GOAL_TEST; // 550
+
+/* Chart.js instances */
+let seedChart = null;
+let testChart = null;
+
+/* Init on load */
+window.addEventListener('load', () => {
+  if (!WEB_APP_URL || !WEB_APP_URL.startsWith('https://')) {
+    document.getElementById('connectionStatus').innerText = '⚠️ Configure WEB_APP_URL in the file.';
+    return;
+  }
+  // create charts
+  seedChart = createHorizontalChart('seedChart', 'Seed');
+  testChart = createHorizontalChart('testChart', 'Test');
+
+  // initial load
+  loadStats();
+});
+
+/* Create a horizontal Chart.js bar chart for topics */
+function createHorizontalChart(canvasId, labelPrefix) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: TOPICS.map(t => t),
+      datasets: [{
+        label: labelPrefix + ' %',
+        data: TOPICS.map(_=>0),
+        backgroundColor: TOPICS.map(()=> 'rgba(102,126,234,0.9)'),
+        borderRadius: 6,
+        barThickness: 18
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      animation: { duration: 400 },
+      scales: {
+        x: {
+          min: 0,
+          max: 100,
+          ticks: { callback: v => v + '%' }
+        },
+        y: { 
+          ticks: { font: {size:12} }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const idx = ctx.dataIndex;
+              const percent = ctx.parsed.x;
+              return `${TOPICS[idx]} — ${percent}%`;
             }
-        };
-
-        // Load statistics and recent data
-        async function loadStats() {
-            showAlert('Loading data...', 'info');
-            
-            try {
-                const response = await fetch(`${WEB_APP_URL}?action=getStats`);
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    // Update stats
-                    document.getElementById('totalCount').textContent = data.totalCount;
-                    document.getElementById('nextId').textContent = data.nextId;
-                    document.getElementById('todayCount').textContent = data.todayCount;
-                    document.getElementById('sampleId').value = data.nextId;
-                    
-                    // Update topic distribution
-                    updateTopicDistribution(data.topicCounts);
-                    
-                    // Update recent entries
-                    updateRecentEntries(data.recentEntries);
-                    
-                    hideAlert();
-                } else {
-                    showAlert('Error loading data: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Connection error. Please check your Web App URL.', 'error');
-                console.error(error);
-            }
+          }
         }
+      }
+    }
+  });
+  return chart;
+}
 
-        // Update topic distribution display
-        function updateTopicDistribution(counts) {
-            const container = document.getElementById('topicDistribution');
-            container.innerHTML = '';
-            
-            TOPICS.forEach(topic => {
-                const count = counts[topic] || 0;
-                const div = document.createElement('div');
-                div.className = 'topic-item';
-                div.innerHTML = `
-                    <div class="topic-name">${topic}</div>
-                    <div class="topic-count">${count}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
+/* Fetch stats from backend and update UI + charts */
+async function loadStats() {
+  setConnectionStatus('Connecting...');
+  try {
+    const res = await fetch(`${WEB_APP_URL}?action=getStats`, { method: 'GET', mode: 'cors' });
+    const data = await res.json();
 
-        // Update recent entries display
-        function updateRecentEntries(entries) {
-            const container = document.getElementById('recentEntries');
-            container.innerHTML = '';
-            
-            if (entries.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center;">No entries yet. Add your first sample!</p>';
-                return;
-            }
-            
-            entries.forEach(entry => {
-                const div = document.createElement('div');
-                div.className = 'entry-card';
-                const preview = entry.raw_conversations.substring(0, 100) + '...';
-                div.innerHTML = `
-                    <div class="entry-header">
-                        <span class="entry-id">ID: ${entry.id}</span>
-                        <span class="entry-topic">${entry.topic}</span>
-                    </div>
-                    <div class="entry-content">${preview}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
+    if (!data || data.status !== 'success') {
+      setConnectionStatus('Error loading stats');
+      console.error('Invalid stats response', data);
+      return;
+    }
 
-        // Submit new sample
-        async function submitSample() {
-            const topic = document.getElementById('topic').value;
-            const source = document.getElementById('source').value;
-            const rawConversations = document.getElementById('rawConversations').value;
-            
-            // Validation
-            if (!topic || !source || !rawConversations) {
-                showAlert('Please fill in all required fields (marked with *)', 'error');
-                return;
-            }
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
-            
-            const sampleData = {
-                id: document.getElementById('sampleId').value,
-                topic: topic,
-                source: source,
-                raw_conversations: rawConversations,
-                summary: document.getElementById('summary').value,
-                next_reply: document.getElementById('nextReply').value,
-                notes: document.getElementById('notes').value
-            };
-            
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(sampleData)
-                });
-                
-                // Note: With no-cors mode, we can't read the response
-                // So we assume success and reload stats
-                showAlert('✅ Sample saved successfully!', 'success');
-                
-                // Clear form
-                document.getElementById('topic').value = '';
-                document.getElementById('source').value = '';
-                document.getElementById('rawConversations').value = '';
-                document.getElementById('summary').value = '';
-                document.getElementById('nextReply').value = '';
-                document.getElementById('notes').value = '';
-                
-                // Reload stats to get new next ID
-                setTimeout(() => {
-                    loadStats();
-                }, 1000);
-                
-            } catch (error) {
-                showAlert('Error saving sample. Please try again.', 'error');
-                console.error(error);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '💾 Save to Cloud';
-            }
-        }
+    setConnectionStatus('Connected');
 
-        // Show alert message
-        function showAlert(message, type) {
-            const container = document.getElementById('alertContainer');
-            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info';
-            container.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
-        }
+    // update totals
+    const seedTotal = data.totals.seed || 0;
+    const testTotal = data.totals.test || 0;
+    const overall = data.totals.total || 0;
+    document.getElementById('seedTotal').innerText = seedTotal;
+    document.getElementById('testTotal').innerText = testTotal;
+    document.getElementById('overallTotal').innerText = overall;
+    document.getElementById('seedCollected').innerText = seedTotal;
+    document.getElementById('testCollected').innerText = testTotal;
+    document.getElementById('seedGoal').innerText = TOTAL_GOAL_SEED;
+    document.getElementById('testGoal').innerText = TOTAL_GOAL_TEST;
+    document.getElementById('overallGoalText').innerText = `${overall} / ${TOTAL_GOAL}`;
 
-        // Hide alert
-        function hideAlert() {
-            document.getElementById('alertContainer').innerHTML = '';
-        }
-    </script>
+    // per-topic progress data structure from backend: data.perTopicProgress.seed[topic] => {count,goal,percent}
+    // Build arrays for Chart.js (percent)
+    const seedPercents = TOPICS.map(t => {
+      const entry = data.perTopicProgress && data.perTopicProgress.seed && data.perTopicProgress.seed[t];
+      return entry ? Math.round(entry.percent) : 0;
+    });
+    const testPercents = TOPICS.map(t => {
+      const entry = data.perTopicProgress && data.perTopicProgress.test && data.perTopicProgress.test[t];
+      return entry ? Math.round(entry.percent) : 0;
+    });
+
+    // update charts
+    updateChart(seedChart, seedPercents);
+    updateChart(testChart, testPercents);
+
+    // overall progress bar
+    const overallPercent = Math.round((overall / TOTAL_GOAL) * 100);
+    const fill = document.getElementById('overallProgressFill');
+    fill.style.width = Math.min(100, overallPercent) + '%';
+    fill.innerText = Math.min(100, overallPercent) + '%';
+
+    // recent entries
+    renderRecentEntries(data.recentEntries || []);
+
+  } catch (err) {
+    console.error(err);
+    setConnectionStatus('Connection failed');
+  }
+}
+
+/* Helper to update chart data */
+function updateChart(chart, newData) {
+  if (!chart) return;
+  chart.data.datasets[0].data = newData;
+  chart.update();
+}
+
+/* Render recent entries with Delete buttons */
+function renderRecentEntries(entries) {
+  const container = document.getElementById('recentEntries');
+  container.innerHTML = '';
+  if (!entries || entries.length === 0) {
+    container.innerHTML = '<div class="small">No entries yet.</div>';
+    return;
+  }
+  entries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'entry';
+    const preview = (e.raw_conversations && e.raw_conversations.length > 140) ? e.raw_conversations.slice(0,140) + '…' : (e.raw_conversations||'');
+    div.innerHTML = `
+      <div class="meta">
+        <div style="display:flex;flex-direction:column">
+          <div><span class="id">${e.id||'(no id)'}</span> <span class="small" style="margin-left:6px">${e.dataset_type||''} • ${e.topic||''}</span></div>
+          <div class="small" style="margin-top:6px;color:var(--muted)">${e.source || ''} ${e.source_url ? ' • ' + e.source_url : ''}</div>
+        </div>
+        <div style="text-align:right">
+          <button class="btn btn-danger" onclick="deleteSample('${encodeURIComponent(e.id)}')">Delete</button>
+        </div>
+      </div>
+      <div style="font-size:14px;color:#111">${escapeHtml(preview)}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* Submit new sample to backend */
+async function submitSample() {
+  const dataset_type = document.getElementById('datasetType').value;
+  const topic = document.getElementById('topic').value;
+  const source = document.getElementById('source').value.trim();
+  const source_url = document.getElementById('sourceUrl').value.trim();
+  const raw_conversations = document.getElementById('rawConversations').value.trim();
+  const summary = document.getElementById('summary').value.trim();
+  const next_reply = document.getElementById('nextReply').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+
+  const formMsg = document.getElementById('formMsg');
+  formMsg.innerText = '';
+
+  if (!dataset_type || !topic || !source || !raw_conversations) {
+    formMsg.innerText = 'Please fill required fields.';
+    return;
+  }
+
+  const payload = { dataset_type, topic, source, source_url, raw_conversations, summary, next_reply, notes };
+
+  // Try sending with CORS first; if blocked, fallback to no-cors
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    // Some Apps Script deployments may return empty body or CORS restrictions; still reload stats
+    loadStats();
+    clearForm();
+    formMsg.innerText = 'Saved ✔';
+    setTimeout(()=>formMsg.innerText='',1600);
+  } catch (err) {
+    // fallback: no-cors (silent) — still attempt, then refresh
+    try {
+      await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      loadStats();
+      clearForm();
+      formMsg.innerText = 'Saved (no-cors) ✔';
+      setTimeout(()=>formMsg.innerText='',1600);
+    } catch (err2) {
+      console.error('POST failed', err2);
+      formMsg.innerText = 'Save failed.';
+    }
+  }
+}
+
+/* Delete sample by formatted id (encoded) */
+async function deleteSample(encodedId) {
+  const id = decodeURIComponent(encodedId);
+  if (!confirm(`Delete ${id} ? This will resequence all IDs.`)) return;
+  try {
+    await fetch(`${WEB_APP_URL}?action=delete&id=${encodeURIComponent(id)}`, { method:'GET', mode:'cors' });
+    loadStats();
+  } catch (err) {
+    // try without CORS
+    try {
+      await fetch(`${WEB_APP_URL}?action=delete&id=${encodeURIComponent(id)}`, { method:'GET', mode:'no-cors' });
+      loadStats();
+    } catch (err2) {
+      alert('Delete failed. Check console.');
+      console.error(err2);
+    }
+  }
+}
+
+/* Utility: clear form */
+function clearForm(){
+  document.getElementById('datasetType').value='';
+  document.getElementById('topic').value='';
+  document.getElementById('source').value='';
+  document.getElementById('sourceUrl').value='';
+  document.getElementById('rawConversations').value='';
+  document.getElementById('summary').value='';
+  document.getElementById('nextReply').value='';
+  document.getElementById('notes').value='';
+}
+
+/* Utility: set connection status text */
+function setConnectionStatus(txt){
+  const el = document.getElementById('connectionStatus');
+  el.innerText = txt;
+}
+
+/* Escape html for preview display */
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+}
+</script>
 </body>
 </html>
